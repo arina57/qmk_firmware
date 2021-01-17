@@ -10,8 +10,9 @@
  * edit it directly.
  */
 
-uint8_t sensitivityDivider = 5;
-uint8_t deadzone           = 10;
+float sensitivityMultiplier[] = {0.15, 0.15};
+float directionalMultiplier[] = {-1, -1};
+uint8_t deadzone[]           = {10, 10};
 
 char newline[2] = "\n";
 
@@ -64,15 +65,27 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 void pointing_device_task(void) {
     report_mouse_t currentReport = pointing_device_get_report();
 
-    int8_t y = (int8_t)((analogReadPin(B4) - 512) / 4);
-    int8_t x = (int8_t)((analogReadPin(B5) - 512) / 4);
 
-    if (x > deadzone || x < -deadzone) {
-        currentReport.x = -x / sensitivityDivider;
-    }
-    if (y > deadzone || y < -deadzone) {
-        y               = y;
-        currentReport.y = -y / sensitivityDivider;
+    int8_t pos[2];
+    int16_t pins[2];
+    pins[0] = analogReadPin(B4);
+    pins[1]  = analogReadPin(B5);
+
+
+
+    for (int i = 0; i< 2; i++){
+        //Get the value for analog pins
+        //Analog pins valus are between 0 and 1023
+        //where as the mouse report position is between -127 and 127
+        pos[i]  =(int8_t) ((pins[i] - 512) / 4);
+        if (pos[i] > abs(deadzone[i]) ) {
+            pos[i] = (int8_t)floor(pos[i] * sensitivityMultiplier[i] * directionalMultiplier[i]);
+        } else  {
+            pos[i] = 0;
+        }
+
+        currentReport.x = pos[0];
+        currentReport.y = pos[1];
     }
 
     pointing_device_set_report(currentReport);
@@ -89,6 +102,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 // int8_t x = (int8_t)((analogReadPin(B4) - 512) / 4);
                 // int8_t y = (int8_t)((analogReadPin(B5) - 512) / 4);
                 // sprintf(str, "x:%d ", x);
+
                 // send_string(str);
                 // sprintf(str, "y:%d ", y);
                 // send_string(str);
