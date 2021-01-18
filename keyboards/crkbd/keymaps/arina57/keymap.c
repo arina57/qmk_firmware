@@ -68,8 +68,9 @@ void pointing_device_task(void) {
 
     int8_t pos[2];
     int16_t pins[2];
-    pins[0] = analogReadPin(B4);
-    pins[1]  = analogReadPin(B5);
+    pins[0]  = analogReadPin(B5);
+    pins[1] = analogReadPin(B4);
+
 
 
 
@@ -77,8 +78,9 @@ void pointing_device_task(void) {
         //Get the value for analog pins
         //Analog pins valus are between 0 and 1023
         //where as the mouse report position is between -127 and 127
-        pos[i]  =(int8_t) ((pins[i] - 512) / 4);
-        if (pos[i] > abs(deadzone[i]) ) {
+
+        if (pins[i] > deadzone[i] || pins[i] < -deadzone[i] ) {
+            pos[i]  =(int8_t) ((pins[i] - 512) / 4);
             pos[i] = (int8_t)floor(pos[i] * sensitivityMultiplier[i] * directionalMultiplier[i] * sensitivityModifier);
         } else  {
             pos[i] = 0;
@@ -92,12 +94,41 @@ void pointing_device_task(void) {
     pointing_device_send();
 }
 
+// #ifdef OLED_DRIVER_ENABLE
+// void oled_task_user(void) {
+//     // Host Keyboard Layer Status
+//     oled_write_P(PSTR("Layer: "), false);
+
+//     switch (get_highest_layer(layer_state)) {
+//         case _QWERTY:
+//             oled_write_P(PSTR("Default\n"), false);
+//             break;
+//         case _FN:
+//             oled_write_P(PSTR("FN\n"), false);
+//             break;
+//         case _ADJ:
+//             oled_write_P(PSTR("ADJ\n"), false);
+//             break;
+//         default:
+//             // Or use the write_ln shortcut over adding '\n' to the end of your string
+//             oled_write_ln_P(PSTR("Undefined"), false);
+//     }
+
+//     // Host Keyboard LED Status
+//     led_t led_state = host_keyboard_led_state();
+//     oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
+//     oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
+//     oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
+// }
+// #endif
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case  KC_LSFT:
             if (record->event.pressed) {
 
                 sensitivityModifier = 0.5;
+
                 // // when keycode QMKBEST is pressed
                 // char str[40];
 
@@ -112,6 +143,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 sensitivityModifier = 1;
                 // when keycode QMKBEST is released
             }
+            char str[80];
+            sprintf(str, "%f", sensitivityModifier);
+            oled_write_P(str, false);
             break;
     }
     return true;
