@@ -12,8 +12,8 @@
 float sensitivityModifier =   1;
 float sensitivityMultiplier[] = {0.15, 0.15};
 float directionalMultiplier[] = {-1, -1};
-uint8_t deadzoneMax[] = {100, 100};
-uint8_t deadzoneMin[] = {-100, -100};
+uint8_t deadzoneMax[] = {10, 10};
+uint8_t deadzoneMin[] = {-10, -10};
 
 char newline[2] = "\n";
 
@@ -63,11 +63,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         )
         };
 
+
+char keylog_str[24] = {};
+char mouselog_str[24] = {};
+
 void pointing_device_task(void) {
     report_mouse_t currentReport = pointing_device_get_report();
 
 
     int8_t pos[2];
+    int8_t posRaw[2];
     int16_t pins[2];
     pins[0]  = analogReadPin(B5);
     pins[1] = analogReadPin(B4);
@@ -79,16 +84,18 @@ void pointing_device_task(void) {
         //Get the value for analog pins
         //Analog pins valus are between 0 and 1023
         //where as the mouse report position is between -127 and 127
-        pos[i]  =(int8_t) floor(((pins[i] - 512) / 4) * directionalMultiplier[i] );
-        if (pins[i] > deadzoneMax[i] || pins[i] < deadzoneMin[i] ) {
+        posRaw[i]  =(int8_t) floor(((pins[i] - 512) / 4) * directionalMultiplier[i] );
+        if (posRaw[i] > deadzoneMax[i] || posRaw[i] < deadzoneMin[i] ) {
 
-            pos[i] = (int8_t)floor(pos[i] * sensitivityMultiplier[i] * sensitivityModifier);
+            pos[i] = (int8_t)floor(posRaw[i] * sensitivityMultiplier[i] * sensitivityModifier);
         } else  {
             pos[i] = 0;
         }
 
 
     }
+
+    snprintf(mouselog_str, sizeof(mouselog_str), "x%4d, y%4d", posRaw[0], posRaw[1]);
     currentReport.x = pos[0];
     currentReport.y = pos[1];
     pointing_device_set_report(currentReport);
@@ -154,7 +161,7 @@ void pointing_device_task(void) {
 
 
 
-#ifdef OLED_DRIVER_ENABLE
+
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
   if (!is_master) {
     return OLED_ROTATION_180;  // flips the display 180 degrees if offhand
@@ -189,7 +196,7 @@ void oled_render_layer_state(void) {
 }
 
 
-char keylog_str[24] = {};
+
 
 const char code_to_name[60] = {
     ' ', ' ', ' ', ' ', 'a', 'b', 'c', 'd', 'e', 'f',
@@ -200,22 +207,21 @@ const char code_to_name[60] = {
     '#', ';', '\'', '`', ',', '.', '/', ' ', ' ', ' '};
 
 void set_keylog(uint16_t keycode, keyrecord_t *record) {
-  char name = ' ';
-    if ((keycode >= QK_MOD_TAP && keycode <= QK_MOD_TAP_MAX) ||
-        (keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX)) { keycode = keycode & 0xFF; }
-  if (keycode < 60) {
-    name = code_to_name[keycode];
-  }
+    char name = ' ';
+    if ((keycode >= QK_MOD_TAP && keycode <= QK_MOD_TAP_MAX) || (keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX)) {
+        keycode = keycode & 0xFF;
+    }
+    if (keycode < 60) {
+        name = code_to_name[keycode];
+    }
 
-  // update keylog
-  snprintf(keylog_str, sizeof(keylog_str), "%dx%d, k%2d : %c",
-           record->event.key.row, record->event.key.col,
-           keycode, name);
+    // update keylog
+    snprintf(keylog_str, sizeof(keylog_str), "%dx%d, k%2d : %c", record->event.key.row, record->event.key.col, keycode, name);
 }
 
-void oled_render_keylog(void) {
-    oled_write(keylog_str, false);
-}
+void oled_render_keylog(void) { oled_write(keylog_str, false); }
+
+void oled_render_mouselog(void) { oled_write(mouselog_str, false); }
 
 void render_bootmagic_status(bool status) {
     /* Show Ctrl-Gui Swap options */
@@ -245,15 +251,16 @@ void oled_task_user(void) {
     if (is_master) {
         oled_render_layer_state();
         oled_render_keylog();
+        oled_render_mouselog();
     } else {
         oled_render_logo();
     }
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (record->event.pressed) {
-    set_keylog(keycode, record);
-  }
-  return true;
+    if (record->event.pressed) {
+        set_keylog(keycode, record);
+    }
+    return true;
 }
-#endif // OLED_DRIVER_ENABLE
+
