@@ -50,7 +50,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     { R05, R04, R03, R02, R01, R00 }, \
     { R15, R14, R13, R12, R11, R10 }, \
     { R25, R24, R23, R22, R21, R20 }, \
-    { KC_NO, KC_NO, KC_NO, R32, R31, R30,R29 } \
+    { KC_NO, KC_NO, R32, R31, R30,R29 } \
   }
 
 
