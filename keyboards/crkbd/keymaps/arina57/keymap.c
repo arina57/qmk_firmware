@@ -105,7 +105,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, KC_NO, KC_NO,                   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_F12,
         RGB_MOD, RGB_HUD, RGB_SAD, RGB_VAD, KC_NO, KC_NO,                   KC_NO, KC_NO, KC_NO, KC_NO, DF(0), DF(4),
                             KC_LGUI, KC_SPC, KC_TRNS, KC_MS_BTN2,     KC_NO, KC_TRNS, KC_ENT, KC_NO
-        ),
+        )};
 
     // [4] = LAYOUT_split_3x6_4(
 
