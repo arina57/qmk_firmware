@@ -102,7 +102,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [3] = LAYOUT_split_3x6_4(
 
         KC_NO, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5,                           KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_TRNS,
-        RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, KC_NO, KC_NO,                   KC_NO, KC_NO, KC_NO, KC_F11, KC_F12, KC_NO,
+        RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, KC_NO, KC_NO,                   KC_NO, KC_NO, KC_NO, KC_NO, KC_F11, KC_F12,
         RGB_MOD, RGB_HUD, RGB_SAD, RGB_VAD, KC_NO, KC_NO,                   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS,
                             KC_TRNS, KC_SPC, KC_TRNS, KC_MS_BTN2,     KC_NO, KC_TRNS, KC_ENT, KC_NO
         )};
